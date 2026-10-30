@@ -1,0 +1,66 @@
+local Players = game:GetService("Players")
+
+local AccountModule = {}
+
+local LocalPlayer = Players.LocalPlayer
+local Initialized = false
+
+function AccountModule.Initialize(options)
+    options = options or {}
+
+    LocalPlayer = options.LocalPlayer or Players.LocalPlayer
+    Initialized = LocalPlayer ~= nil
+
+    return Initialized
+end
+
+function AccountModule.GetPlayer()
+    return LocalPlayer
+end
+
+function AccountModule.GetInfo(player)
+    player = player or LocalPlayer
+
+    if not player or not player:IsA("Player") then
+        return nil
+    end
+
+    return {
+        UserId = player.UserId,
+        Name = player.Name,
+        DisplayName = player.DisplayName,
+        AccountAge = player.AccountAge,
+        MembershipType = player.MembershipType,
+        IsLocalPlayer = player == LocalPlayer
+    }
+end
+
+function AccountModule.GetUserId(player)
+    player = player or LocalPlayer
+    return player and player.UserId or nil
+end
+
+function AccountModule.GetUsername(player)
+    player = player or LocalPlayer
+    return player and player.Name or nil
+end
+
+function AccountModule.GetDisplayName(player)
+    player = player or LocalPlayer
+    return player and player.DisplayName or nil
+end
+
+function AccountModule.GetAccountAge(player)
+    player = player or LocalPlayer
+    return player and player.AccountAge or nil
+end
+
+function AccountModule.IsLocalPlayer(player)
+    return player ~= nil and player == LocalPlayer
+end
+
+function AccountModule.IsInitialized()
+    return Initialized
+end
+
+return AccountModule
