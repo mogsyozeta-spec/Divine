@@ -1,0 +1,102 @@
+local Players = game:GetService("Players")
+
+local TargetModule = {}
+
+local LocalPlayer = Players.LocalPlayer
+local CurrentTarget = nil
+local Initialized = false
+
+function TargetModule.Initialize(options)
+    options = options or {}
+
+    LocalPlayer = options.LocalPlayer or Players.LocalPlayer
+    CurrentTarget = nil
+    Initialized = true
+
+    return TargetModule
+end
+
+function TargetModule.IsValidTarget(player)
+    if typeof(player) ~= "Instance" or not player:IsA("Player") then
+        return false
+    end
+
+    if player == LocalPlayer or player.Parent ~= Players then
+        return false
+    end
+
+    local character = player.Character
+    if not character then
+        return false
+    end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+
+    return humanoid ~= nil
+        and humanoid.Health > 0
+        and rootPart ~= nil
+end
+
+function TargetModule.SetTarget(player)
+    if not TargetModule.IsValidTarget(player) then
+        return false
+    end
+
+    CurrentTarget = player
+    return true
+end
+
+function TargetModule.GetTarget()
+    if not TargetModule.IsValidTarget(CurrentTarget) then
+        CurrentTarget = nil
+        return nil
+    end
+
+    return CurrentTarget
+end
+
+function TargetModule.ClearTarget()
+    CurrentTarget = nil
+end
+
+function TargetModule.GetPlayer(name)
+    if type(name) ~= "string" or name == "" then
+        return nil
+    end
+
+    local loweredName = string.lower(name)
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if string.lower(player.Name) == loweredName
+            or string.lower(player.DisplayName) == loweredName then
+            return player
+        end
+    end
+
+    return nil
+end
+
+function TargetModule.GetPlayers()
+    local result = {}
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if TargetModule.IsValidTarget(player) then
+            result[#result + 1] = player
+        end
+    end
+
+    return result
+end
+
+function TargetModule.IsInitialized()
+    return Initialized
+end
+
+Players.PlayerRemoving:Connect(function(player)
+    if player == CurrentTarget then
+        CurrentTarget = nil
+    end
+end)
+
+return TargetModule
