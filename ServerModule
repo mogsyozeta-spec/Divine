@@ -1,0 +1,89 @@
+local Players = game:GetService("Players")
+
+local Module = {}
+
+local Initialized = false
+
+function Module.Initialize()
+    Initialized = true
+    return Module
+end
+
+function Module.GetInfo()
+    return {
+        PlaceId = game.PlaceId,
+        JobId = game.JobId,
+        CreatorId = game.CreatorId,
+        GameId = game.GameId,
+        IsStudio = game:GetService("RunService"):IsStudio()
+    }
+end
+
+function Module.GetPlayerCount()
+    return #Players:GetPlayers()
+end
+
+function Module.GetMaxPlayerCount()
+    return Players.MaxPlayers
+end
+
+function Module.GetPlayerList()
+    local playerList = {}
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        playerList[#playerList + 1] = {
+            Name = player.Name,
+            DisplayName = player.DisplayName,
+            UserId = player.UserId
+        }
+    end
+
+    return playerList
+end
+
+function Module.FindPlayer(username)
+    if type(username) ~= "string" or username == "" then
+        return nil
+    end
+
+    local query = string.lower(username)
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if string.lower(player.Name) == query
+            or string.lower(player.DisplayName) == query then
+            return player
+        end
+    end
+
+    return nil
+end
+
+function Module.IsFull()
+    return Module.GetPlayerCount() >= Module.GetMaxPlayerCount()
+end
+
+function Module.GetOccupancy()
+    local current = Module.GetPlayerCount()
+    local maximum = Module.GetMaxPlayerCount()
+
+    return {
+        Current = current,
+        Maximum = maximum,
+        Available = math.max(0, maximum - current),
+        IsFull = current >= maximum
+    }
+end
+
+function Module.GetPlayerAddedSignal()
+    return Players.PlayerAdded
+end
+
+function Module.GetPlayerRemovingSignal()
+    return Players.PlayerRemoving
+end
+
+function Module.IsInitialized()
+    return Initialized
+end
+
+return Module
