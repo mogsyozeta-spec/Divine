@@ -1,0 +1,29 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local MAINEVENT = ReplicatedStorage and ReplicatedStorage:WaitForChild("MAINEVENT")
+
+local EventModule = {}
+
+function EventModule.Stomp()
+    MAINEVENT:FireServer("STOMP")
+end
+
+function EventModule.Aim(Pos)
+    MAINEVENT:FireServer("MOUSE", Pos)
+end
+
+function EventModule.Reload()
+
+    local LocalCharacter = LocalPlayer.Character
+    local Tool = LocalCharacter and LocalCharacter:FindFirstChildOfClass("Tool")
+    local RL = Tool and Tool:FindFirstChild("rl")
+    
+    if RL then
+        RL:FireServer()
+    end
+
+end
+
+return EventModule
