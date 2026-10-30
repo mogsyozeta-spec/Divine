@@ -6,7 +6,7 @@ local LocalPlayer = Players.LocalPlayer
 
 -- // Imports
 local CharacterModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/mogsyozeta-spec/Divine/refs/heads/main/CharacterModule"))()
-local WeaponModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/mogsyozeta-spec/Divine/refs/heads/main/Weapon%20Module"))()
+local WeaponModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/mogsyozeta-spec/Divine/refs/heads/main/WeaponModule"))()
 local EventModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/mogsyozeta-spec/Divine/refs/heads/main/EventModules"))()
 
 local ActionModule = {}
