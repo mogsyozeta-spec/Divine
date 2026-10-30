@@ -1,0 +1,62 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local WeaponModule = {}
+
+function WeaponModule.EditToolGrip(Tool, Vec3)
+    Tool.Grip = Vec3
+    Tool.Parent = LocalPlayer.Backpack
+    Tool.Parent = LocalPlayer.Character
+end
+
+function WeaponModule.GetRelativePos(CF)
+
+    local LocalCharacter = LocalPlayer.Character
+    local RightHand = LocalCharacter and LocalCharacter.RightHand
+    if not RightHand then return end
+
+    local Offset = RightHand.CFrame * CFrame.new(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, -1, 0)
+    local Relative = Offset:ToObjectSpace(CF):Inverse()
+    
+    return Relative
+end
+
+function WeaponModule.CalculateResolverOffset(Part)
+
+    local StartPos = Part.Position
+    local delta = RunService.Heartbeat:Wait()
+    local EndPos = Part.Position
+            
+    local DistanceParcouru = EndPos - StartPos
+    local Velocity = DistanceParcouru / delta
+    
+    return Velocity
+end
+
+function WeaponModule.GetAmmoCount(player)
+    local player = player or LocalPlayer
+
+    local Character = player.Character
+    if not Character then return false end
+
+    local tool = Character:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+
+    local ammo = tool:FindFirstChild("AMMO")
+    if ammo then
+        return ammo.Value
+    end
+
+    return false
+end
+
+function WeaponModule.IsReloaded(player)
+    local player = player or LocalPlayer
+        
+    local Backpack = player.Backpack
+    return Backpack ~= nil and Backpack:GetAttribute("IsReloading") == true
+end
+
+return WeaponModule
