@@ -94,3 +94,57 @@ end
 
 function Module.ClearConnections(connections)
     if type(connections) ~= "table" then
+        return
+    end
+
+    for key, connection in pairs(connections) do
+        Module.Disconnect(connection)
+        connections[key] = nil
+    end
+end
+
+function Module.ShallowCopy(source)
+    local copy = {}
+
+    if type(source) ~= "table" then
+        return copy
+    end
+
+    for key, value in pairs(source) do
+        copy[key] = value
+    end
+
+    return copy
+end
+
+function Module.Contains(list, value)
+    if type(list) ~= "table" then
+        return false
+    end
+
+    return table.find(list, value) ~= nil
+end
+
+function Module.FormatDuration(seconds)
+    seconds = math.max(0, math.floor(tonumber(seconds) or 0))
+
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local remainingSeconds = seconds % 60
+
+    if hours > 0 then
+        return string.format("%02d:%02d:%02d", hours, minutes, remainingSeconds)
+    end
+
+    return string.format("%02d:%02d", minutes, remainingSeconds)
+end
+
+function Module.Clamp(value, minimum, maximum)
+    value = tonumber(value) or 0
+    minimum = tonumber(minimum) or 0
+    maximum = tonumber(maximum) or minimum
+
+    return math.clamp(value, minimum, maximum)
+end
+
+return Module
