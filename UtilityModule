@@ -1,0 +1,96 @@
+local Players = game:GetService("Players")
+
+local Module = {}
+
+function Module.GetLocalPlayer()
+    return Players.LocalPlayer
+end
+
+function Module.GetCharacter(player)
+    player = player or Players.LocalPlayer
+    return player and player.Character
+end
+
+function Module.GetHumanoid(character)
+    character = character or Module.GetCharacter()
+    return character and character:FindFirstChildOfClass("Humanoid")
+end
+
+function Module.GetRootPart(character)
+    character = character or Module.GetCharacter()
+
+    if not character then
+        return nil
+    end
+
+    return character:FindFirstChild("HumanoidRootPart")
+        or character:FindFirstChild("Torso")
+        or character:FindFirstChild("UpperTorso")
+end
+
+function Module.IsCharacterAlive(character)
+    local humanoid = Module.GetHumanoid(character)
+    local rootPart = Module.GetRootPart(character)
+
+    return humanoid ~= nil
+        and rootPart ~= nil
+        and humanoid.Health > 0
+end
+
+function Module.SafeCall(callback, ...)
+    if type(callback) ~= "function" then
+        return false, "Callback must be a function"
+    end
+
+    return pcall(callback, ...)
+end
+
+function Module.GetService(serviceName)
+    if type(serviceName) ~= "string" or serviceName == "" then
+        return nil
+    end
+
+    local ok, service = pcall(function()
+        return game:GetService(serviceName)
+    end)
+
+    return ok and service or nil
+end
+
+function Module.WaitForChild(parent, childName, timeout)
+    if not parent or type(childName) ~= "string" then
+        return nil
+    end
+
+    local ok, child = pcall(function()
+        return parent:WaitForChild(childName, timeout)
+    end)
+
+    return ok and child or nil
+end
+
+function Module.FindFirst(parent, ...)
+    if not parent then
+        return nil
+    end
+
+    for _, name in ipairs({ ... }) do
+        local child = parent:FindFirstChild(name)
+        if child then
+            return child
+        end
+    end
+
+    return nil
+end
+
+function Module.Disconnect(connection)
+    if connection and typeof(connection) == "RBXScriptConnection" then
+        pcall(function()
+            connection:Disconnect()
+        end)
+    end
+end
+
+function Module.ClearConnections(connections)
+    if type(connections) ~= "table" then
