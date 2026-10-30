@@ -1,0 +1,61 @@
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+
+local CharacterModule = {}
+
+function CharacterModule.EquipTool(Tool)
+    if not Tool or not Tool.Parent then return warn("Tool not found") end
+
+    local Character = LocalPlayer.Character
+    local Humanoid = Character and Character:FindFirstChild("Humanoid")
+
+    if not Character or not Humanoid then return warn("") end 
+
+    Humanoid:UnequipTools()
+    Humanoid:EquipTool(Tool)
+    return "Equiped"
+end
+
+function CharacterModule.GetEquippedTool(player)
+    local player = player or LocalPlayer
+
+    local Character = player.Character 
+    return Character and Character:FindFirstChildOfClass("Tool")
+end
+
+function CharacterModule.Health(player)
+    local player = player or LocalPlayer
+
+    local Character = LocalPlayer.Character
+    local Humanoid = Character and Character:FindFirstChild("Humanoid")
+    local Health = Humanoid and Humanoid.Health
+
+    if not Character or not Humanoid or not Health then return end
+
+    return Health
+end
+
+function CharacterModule.IsKnockedOut(player)
+    local player = player or LocalPlayer
+
+    local Character = player.Character
+    return Character ~= nil and Character:GetAttribute("Knocked") == true
+end
+
+function CharacterModule.IsDead(player)
+    local player = player or LocalPlayer
+
+    local Character = player.Character
+    return Character ~= nil and Character:GetAttribute("Dead") == true
+end
+
+function CharacterModule.HasLoaded(player)
+    local player = player or LocalPlayer
+
+    local Character = player.Character
+    local bodyvalues = Character and Character:FindFirstChild("bodyvalues")
+    return bodyvalues ~= nil and bodyvalues:FindFirstChild("LOADED") ~= nil
+end
+
+return CharacterModule
