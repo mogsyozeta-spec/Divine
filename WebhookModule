@@ -1,0 +1,94 @@
+local HttpService = game:GetService("HttpService")
+
+local Module = {}
+
+local Config = nil
+local Request = nil
+
+local function getRequestFunction()
+    return (syn and syn.request)
+        or http_request
+        or request
+        or (http and http.request)
+end
+
+local function getWebhookUrls()
+    local webhooks = Config and Config.Webhooks
+
+    if type(webhooks) == "string" then
+        return { webhooks }
+    end
+
+    if type(webhooks) ~= "table" then
+        return {}
+    end
+
+    return webhooks
+end
+
+function Module.Initialize(options)
+    options = options or {}
+
+    Config = options.Config or (getgenv and getgenv().Imperial) or {}
+    Request = options.Request or getRequestFunction()
+
+    return Module
+end
+
+function Module.Send(payload)
+    if type(payload) ~= "table" then
+        return false, "Payload must be a table"
+    end
+
+    if type(Request) ~= "function" then
+        return false, "HTTP request function is unavailable"
+    end
+
+    local urls = getWebhookUrls()
+    if #urls == 0 then
+        return false, "No webhook URLs configured"
+    end
+
+    local encoded
+    local encodeOk, encodeError = pcall(function()
+        encoded = HttpService:JSONEncode(payload)
+    end)
+
+    if not encodeOk then
+        return false, encodeError
+    end
+
+    local queued = 0
+
+    for _, url in ipairs(urls) do
+        if type(url) == "string" and url:match("^https://discord%.com/api/webhooks/") then
+            queued += 1
+
+            task.spawn(function()
+                local ok, response = pcall(function()
+                    return Request({
+                        Url = url,
+                        Method = "POST",
+                        Headers = {
+                            ["Content-Type"] = "application/json"
+                        },
+                        Body = encoded
+                    })
+                end)
+
+                local status = ok and response and tonumber(response.StatusCode or response.Status)
+                if not status or status < 200 or status >= 300 then
+                    warn("[WebhookModule] Webhook request failed:", url)
+                end
+            end)
+        end
+    end
+
+    if queued == 0 then
+        return false, "No valid Discord webhook URLs configured"
+    end
+
+    return true, queued
+end
+
+return Module
