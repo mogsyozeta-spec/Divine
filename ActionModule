@@ -1,0 +1,104 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- // Imports
+local CharacterModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/mogsyozeta-spec/Divine/refs/heads/main/CharacterModule"))()
+local WeaponModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/mogsyozeta-spec/Divine/refs/heads/main/Weapon%20Module"))()
+local EventModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/mogsyozeta-spec/Divine/refs/heads/main/EventModules"))()
+
+local ActionModule = {}
+
+local NewGrip
+local OldGrip
+local BuyPads
+for i,v in pairs(Workspace:GetDescendants()) do if v.Name == '[Tactical Shotgun]' then BuyPads = v.Parent break end end
+
+
+function ActionModule.Buy(Item)
+    pcall(fireclickdetector, BuyPads[Item]:FindFirstChild("ClickDetector"), 1)
+end
+
+function ActionModule.BulletTP(player)
+    local success, err = pcall(function()
+        
+        local LocalCharacter = LocalPlayer.Character
+
+        local Tool = LocalCharacter and LocalCharacter:FindFirstChildOfClass("Tool")
+        if not Tool then return warn("You don't have a gun") end
+
+        local ammo = Tool and Tool:FindFirstChild("AMMO")
+        if not ammo then return warn("You don't have a valid gun") end
+
+        local Character = player.Character
+        local Head = Character and Character:FindFirstChild("Head")
+        local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+
+        if not Character or not Head or not HumanoidRootPart then return end
+
+        OldGrip = Tool.Grip
+        NewGrip = WeaponModule.GetRelativePos(HumanoidRootPart.CFrame * CFrame.Angles(math.rad(-90), 0, 0))
+        
+        WeaponModule.EditToolGrip(Tool, NewGrip)
+        RunService.Heartbeat:Wait()
+
+        local Offset = WeaponModule.CalculateResolverOffset(Head)
+        EventModule.Aim(Head.Position + Vector3.new(Offset) * 0.12)
+        Tool:Activate()
+
+        RunService.Heartbeat:Wait()
+        WeaponModule.EditToolGrip(Tool, OldGrip)
+
+    end)
+
+    if not success then
+        warn("ActionModule.BulletTP :", err)
+    end
+    return
+end
+
+function ActionModule.GetArmor()
+
+    local Character = LocalPlayer.Character
+    local Armor_Attribute = Character and Character:GetAttribute("Armor")
+
+    if Armor_Attribute and Armor_Attribute < 100 then
+        ActionModule.Buy("[High-Medium Armor]")
+        ActionModule.Buy("[Medium Armor]")
+    end
+    
+end
+
+function ActionModule.StompTo(player)
+
+    local LocalCharacter = LocalPlayer.Character
+    local LocalRightFoot = LocalCharacter and LocalCharacter:FindFirstChild("RightFoot")
+
+    if not LocalCharacter or not LocalRightFoot then return end
+
+    local Character = player.Character
+    local UpperTorso = Character and Character:FindFirstChild("UpperTorso")
+
+    if not Character or not UpperTorso then return end
+
+    local Cooldown = tick()
+    repeat 
+        local targetPosition  = UpperTorso.Position + Vector3.new(0, UpperTorso.Size.Y / 2 + LocalRightFoot.Size.Y / 2, 0)
+        local offset = targetPosition - LocalRightFoot.Position
+
+        LocalCharacter:PivotTo(LocalCharacter:GetPivot() + offset)
+
+        RunService.Heartbeat:Wait()
+        EventModule.Stomp()
+    until CharacterModule.IsDead(player) 
+        or tick() - Cooldown > 5 
+        or not player.Parent
+        or not UpperTorso.Parent
+        or not LocalRightFoot.Parent
+        or not LocalCharacter.Parent
+
+end
+
+return ActionModule
