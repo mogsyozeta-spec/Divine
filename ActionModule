@@ -45,7 +45,7 @@ function ActionModule.BulletTP(player)
         RunService.Heartbeat:Wait()
 
         local Offset = WeaponModule.CalculateResolverOffset(Head)
-        EventModule.Aim(Head.Position + Vector3.new(Offset.X, Offset.Y, Offset.Z) * 0)
+        EventModule.Aim(Head.Position + Vector3.new(Offset.X, Offset.Y, Offset.Z) * 12)
         Tool:Activate()
 
         RunService.Heartbeat:Wait()
